@@ -1,16 +1,13 @@
 import os
+import telebot
 import sqlite3
 from datetime import datetime
-from flask import Flask, request
-import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
 TOKEN = os.environ.get("BOT_TOKEN")
 ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID")
-CHANNEL_URL = "https://t.me/TedxYazyavan"
 
-bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
-app = Flask(__name__)
+bot = telebot.TeleBot(TOKEN)
 
 DB_PATH = "data.db"
 
@@ -33,16 +30,16 @@ temp_name = {}
 
 def levels_keyboard():
     kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    kb.add(KeyboardButton("A1-A2"), KeyboardButton("B1-B2"), KeyboardButton("B2+"))
+    kb.add("A1-A2", "B1-B2", "B2+")
     return kb
 
-@bot.message_handler(commands=["start"])
+@bot.message_handler(commands=['start'])
 def start(message):
     user_state[message.from_user.id] = "WAIT_NAME"
     bot.send_message(message.chat.id, "Ism familiyangizni yozing:")
 
 @bot.message_handler(func=lambda m: True)
-def handle_text(message):
+def handle(message):
     user_id = message.from_user.id
     text = message.text.strip()
 
@@ -51,7 +48,7 @@ def handle_text(message):
     if state == "WAIT_NAME":
         temp_name[user_id] = text
         user_state[user_id] = "WAIT_LEVEL"
-        bot.send_message(message.chat.id, "Ingliz tili darajangizni tanlang:", reply_markup=levels_keyboard())
+        bot.send_message(message.chat.id, "Ingliz darajangizni tanlang:", reply_markup=levels_keyboard())
         return
 
     if state == "WAIT_LEVEL":
@@ -85,12 +82,4 @@ def handle_text(message):
         user_state.pop(user_id, None)
         temp_name.pop(user_id, None)
 
-@app.route("/", methods=["GET"])
-def home():
-    return "Bot ishlayapti", 200
-
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    update = telebot.types.Update.de_json(request.get_data().decode("utf-8"))
-    bot.process_new_updates([update])
-    return "OK", 200
+bot.infinity_polling()
