@@ -74,10 +74,17 @@ def handle(message):
         )
 
         if ADMIN_CHAT_ID:
-            bot.send_message(
-                ADMIN_CHAT_ID,
-                f"Yangi ro'yxat:\nIsm: {full_name}\nLevel: {level}\nID: {user_id}"
-            )
+             username = message.from_user.username
+             username_text = f"@{username}" if username else "Username yo'q"
+
+             bot.send_message(
+                 ADMIN_CHAT_ID,
+                 f"🆕 Yangi ro'yxat:\n"
+                 f"👤 Ism: {full_name}\n"
+                 f"📚 Level: {level}\n"
+                 f"🔗 Username: {username_text}\n"
+                 f"🆔 ID: {user_id}"
+              )
 
         user_state.pop(user_id, None)
         temp_name.pop(user_id, None)
