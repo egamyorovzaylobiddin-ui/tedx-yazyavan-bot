@@ -94,6 +94,3 @@ def webhook():
     update = telebot.types.Update.de_json(request.get_data().decode("utf-8"))
     bot.process_new_updates([update])
     return "OK", 200
-
-if __name__ == "__main__":
-    app.run()
